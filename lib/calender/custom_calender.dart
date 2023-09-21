@@ -17,6 +17,7 @@ import 'package:intl/intl.dart';
 class CustomCalendar extends StatefulWidget {
   /// The minimum date that can be selected on the calendar
   final DateTime? minimumDate;
+  final List<DateTime> pendingDates, someComplete;
 
   /// The maximum date that can be selected on the calendar
   final DateTime? maximumDate;
@@ -32,6 +33,7 @@ class CustomCalendar extends StatefulWidget {
 
   /// A function to be called when the selected date range changes
   final Function(DateTime, DateTime)? startEndDateChange;
+  final List<Streak> streaks;
 
   const CustomCalendar({
     Key? key,
@@ -41,6 +43,8 @@ class CustomCalendar extends StatefulWidget {
     this.minimumDate,
     this.maximumDate,
     required this.primaryColor,
+    required this.pendingDates,
+    required this.someComplete, required this.streaks,
   }) : super(key: key);
 
   @override
@@ -85,15 +89,17 @@ class CustomCalendarState extends State<CustomCalendar> {
       dateList.add(newDate.add(Duration(days: i + 1)));
     }
 
+    final ls = dateList.sublist(0, 7);
 
-final ls = dateList.sublist(0,7);
+    final getPreviousMonthdatesLength =
+        ls.where((element) => element.month != monthDate.month).length;
 
+    final result = getPreviousMonthdatesLength +
+        getDaysInMonth(monthDate.year, monthDate.month);
 
-bool isShouldReduceList= ls.any((element) => element.month ==monthDate.month);
-log('isShouldReduce $isShouldReduceList');
-
- dateList.length -= 7;
-  
+    if (result <= 35) {
+      dateList.length -= 7;
+    }
   }
 
   @override
@@ -144,11 +150,13 @@ log('isShouldReduce $isShouldReduceList');
                 child: Center(
                   child: Text(
                     DateFormat('MMMM').format(currentMonthDate),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 20,
-                      color: Colors.grey.shade700,
-                    ),
+                    style: const TextStyle(
+                color: Color(0xFF192966),
+                fontSize: 20,
+       
+                fontWeight: FontWeight.w700,
+                height: 0,
+              ),
                   ),
                 ),
               ),
@@ -226,7 +234,6 @@ log('isShouldReduce $isShouldReduceList');
     final List<Widget> noList = <Widget>[];
     int count = 0;
     for (int i = 0; i < dateList.length / 7; i++) {
-      log(i.toString()+'---');
       final List<Widget> listUI = <Widget>[];
       for (int i = 0; i < 7; i++) {
         final DateTime date = dateList[count];
@@ -247,7 +254,8 @@ log('isShouldReduce $isShouldReduceList');
                         height: 3,
                         decoration: BoxDecoration(
                           color: startDate != null && endDate != null
-                              ? getIsItStartAndEndDate(date) || getIsInRange(date)
+                              ? getIsItStartAndEndDate(date) ||
+                                      getIsInRange(date)
                                   ? const Color(0xFF1C9D67)
                                   : Colors.transparent
                               : Colors.transparent,
@@ -293,49 +301,52 @@ log('isShouldReduce $isShouldReduceList');
                         height: 32,
                         width: 32,
                         decoration: BoxDecoration(
-                          color:
-                              getIsItStartAndEndDate(date) || getIsInRange(date)
+                          color: isPendingdayOrSomeComplete(
+                                  date, widget.someComplete)
+                              ? Colors.white
+                              : getIsItStartAndEndDate(date) ||
+                                      getIsInRange(date)
                                   ? const Color(0xFFB5E1B2)
                                   : Colors.transparent,
                           borderRadius:
                               const BorderRadius.all(Radius.circular(32.0)),
                           border: Border.all(
-                            color: getIsItStartAndEndDate(date) ||
-                                    getIsInRange(date)
-                                ? const Color(0xFF1C9D67)
-                                : Colors.transparent,
+                            color: isSameDay(date)
+                                ? const Color(0xFF3B61F4)
+                                : getIsItStartAndEndDate(date) ||
+                                        getIsInRange(date)
+                                    ? const Color(0xFF1C9D67)
+                                    : Colors.transparent,
                             width: 2,
                           ),
                         ),
-                        child: Center(
-                          child: Text(
-                            '${date.day}',
-                            style: const TextStyle(
-                              color: Color(0xFF192966),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${date.day}',
+                              style: TextStyle(
+                                color: currentMonthDate.month == date.month
+                                    ? const Color(0xFF192966)
+                                    : const Color(0xFF192966).withOpacity(.4),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
+                            isPendingdayOrSomeComplete(
+                                    date, widget.pendingDates)
+                                ? Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: const ShapeDecoration(
+                                      color: Color(0xFFDB5656),
+                                      shape: OvalBorder(),
+                                    ),
+                                  )
+                                : const SizedBox()
+                          ],
                         ),
                       ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 24,
-                    right: 16,
-                    left: 0,
-                    child: Container(
-                      height: 6,
-                      width: 6,
-                      decoration: BoxDecoration(
-                          color: DateTime.now().day == date.day &&
-                                  DateTime.now().month == date.month &&
-                                  DateTime.now().year == date.year
-                              ? getIsInRange(date)
-                                  ? Colors.white
-                                  : Colors.blue
-                              : Colors.transparent,
-                          shape: BoxShape.circle),
                     ),
                   ),
                 ],
@@ -365,6 +376,26 @@ log('isShouldReduce $isShouldReduceList');
     } else {
       return false;
     }
+  }
+
+  bool isSameDay(DateTime date) {
+    return DateTime.now().day == date.day &&
+        DateTime.now().month == date.month &&
+        DateTime.now().year == date.year;
+  }
+
+  bool isPendingdayOrSomeComplete(DateTime date, List<DateTime> dates) {
+    bool status = false;
+    for (int i = 0; i < dates.length; i++) {
+      if (dates[i].day == date.day &&
+          dates[i].month == date.month &&
+          dates[i].year == date.year) {
+        status = true;
+        break;
+      }
+    }
+
+    return status;
   }
 
   bool getIsItStartAndEndDate(DateTime date) {
@@ -406,4 +437,39 @@ log('isShouldReduce $isShouldReduceList');
       return false;
     }
   }
+
+  int getDaysInMonth(int year, int month) {
+    if (month == DateTime.february) {
+      final bool isLeapYear =
+          (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
+      return isLeapYear ? 29 : 28;
+    }
+    const List<int> daysInMonth = <int>[
+      31,
+      -1,
+      31,
+      30,
+      31,
+      30,
+      31,
+      31,
+      30,
+      31,
+      30,
+      31
+    ];
+    return daysInMonth[month - 1];
+  }
+}
+
+
+class Streak {
+  final List<DateTime> someComplete, pendingDates;
+  final DateTime streakStartdate, streakEndDate;
+
+  const Streak(
+      {required this.streakEndDate,
+      required this.pendingDates,
+      required this.someComplete,
+      required this.streakStartdate});
 }
