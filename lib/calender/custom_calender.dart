@@ -81,10 +81,18 @@ class CustomCalendarState extends State<CustomCalendar> {
         dateList.add(newDate.subtract(Duration(days: previousMothDay - i)));
       }
     }
-    for (int i = 0; i < (35 - previousMothDay); i++) {
+    for (int i = 0; i < (42 - previousMothDay); i++) {
       dateList.add(newDate.add(Duration(days: i + 1)));
     }
 
+
+final ls = dateList.sublist(0,7);
+
+
+bool isShouldReduceList= ls.any((element) => element.month ==monthDate.month);
+log('isShouldReduce $isShouldReduceList');
+
+ dateList.length -= 7;
   
   }
 
