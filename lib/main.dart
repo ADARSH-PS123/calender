@@ -4,7 +4,6 @@ import 'package:tester/calender/custom_date_picker.dart';
 
 void main() {
   runApp(const MyApp());
-
 }
 
 class MyApp extends StatelessWidget {
@@ -45,10 +44,10 @@ class _MyHomePageState extends State<MyHomePage> {
             color: Colors.transparent,
             child: CustomCalendar(
               primaryColor: Colors.black,
-              minimumDate: DateTime.now().subtract(const Duration(days: 60)),
-              maximumDate: DateTime.now().add(const Duration(days: 30)),
+              minimumDate: DateTime.now().subtract(const Duration(days: 15)),
+              maximumDate: DateTime.now().add(const Duration(days: 15)),
               initialStartDate: DateTime.now(),
-              initialEndDate: DateTime(2023, 10, 15),
+              initialEndDate: DateTime(2023, 9, 28),
             ),
           ),
         ),

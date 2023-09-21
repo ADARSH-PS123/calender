@@ -73,7 +73,7 @@ class CustomCalendarState extends State<CustomCalendar> {
     final DateTime newDate = DateTime(monthDate.year, monthDate.month, 0);
 
     int previousMothDay = 0; //week like sunday
-    if (newDate.weekday < 7) {
+    if (newDate.weekday < 6) {
       //!sunday
       previousMothDay = newDate.weekday + 1;
       for (int i = 1; i <= previousMothDay; i++) {
@@ -81,7 +81,7 @@ class CustomCalendarState extends State<CustomCalendar> {
         dateList.add(newDate.subtract(Duration(days: previousMothDay - i)));
       }
     }
-    for (int i = 0; i < (42 - previousMothDay); i++) {
+    for (int i = 0; i < (35 - previousMothDay); i++) {
       dateList.add(newDate.add(Duration(days: i + 1)));
     }
 
@@ -218,6 +218,7 @@ class CustomCalendarState extends State<CustomCalendar> {
     final List<Widget> noList = <Widget>[];
     int count = 0;
     for (int i = 0; i < dateList.length / 7; i++) {
+      log(i.toString()+'---');
       final List<Widget> listUI = <Widget>[];
       for (int i = 0; i < 7; i++) {
         final DateTime date = dateList[count];
