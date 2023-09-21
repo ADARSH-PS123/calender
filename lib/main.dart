@@ -42,29 +42,31 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Material(
             color: Colors.transparent,
             child: CustomCalendar(
-              streaks: List.generate(
-                  3,
-                  (index) => Streak(
-                      streakEndDate:
-                          DateTime.now().add(Duration(days: index * 10 + 8)),
-                      pendingDates: [],
-                      someComplete: [],
-                      streakStartdate:
-                          DateTime.now().add(Duration(days: index * 10)))),
-              primaryColor: Colors.black,
-              someComplete: [
-                DateTime.now().add(const Duration(days: 2)),
-                DateTime.now().add(const Duration(days: 3)),
-              ],
               pendingDates: [
-                DateTime.now().subtract(const Duration(days: 2)),
-                DateTime.now().subtract(const Duration(days: 3)),
-                DateTime.now()
+                DateTime.now().subtract(Duration(days: 1))
               ],
+              streaks:[
+                Streak(
+                      streakEndDate: DateTime(2023,9,5),
+                    
+                      someComplete: [
+                         DateTime.now().add(Duration(days: 2))
+                      ],
+                      streakStartdate: DateTime(2023,8,25)),
+                      // Streak(
+                      // streakEndDate: DateTime.now().add(Duration(days: 13)),
+            
+                      // someComplete: [],
+                      // streakStartdate: DateTime.now().add(Duration(days: 8))),
+                      // Streak(
+                      // streakEndDate: DateTime.now().add(Duration(days: 20)),
+              
+                      // someComplete: [],
+                      // streakStartdate:DateTime.now().add(Duration(days: 15)))
+              ],
+              primaryColor: Colors.black,
               minimumDate: DateTime.now().subtract(const Duration(days: 15)),
               maximumDate: DateTime.now().add(const Duration(days: 15)),
-              initialStartDate: DateTime.now().add(const Duration()),
-              initialEndDate: DateTime(2023, 10, 10),
             ),
           ),
         ),

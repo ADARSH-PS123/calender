@@ -16,35 +16,30 @@ import 'package:intl/intl.dart';
 /// })`
 class CustomCalendar extends StatefulWidget {
   /// The minimum date that can be selected on the calendar
-  final DateTime? minimumDate;
-  final List<DateTime> pendingDates, someComplete;
 
   /// The maximum date that can be selected on the calendar
-  final DateTime? maximumDate;
 
   /// The initial start date to be shown on the calendar
-  final DateTime? initialStartDate;
 
   /// The initial end date to be shown on the calendar
-  final DateTime? initialEndDate;
 
   /// The primary color to be used in the calendar's color scheme
   final Color primaryColor;
 
   /// A function to be called when the selected date range changes
   final Function(DateTime, DateTime)? startEndDateChange;
+  final DateTime? minimumDate, maximumDate;
   final List<Streak> streaks;
+  final List<DateTime> pendingDates;
 
   const CustomCalendar({
     Key? key,
-    this.initialStartDate,
-    this.initialEndDate,
     this.startEndDateChange,
+    required this.primaryColor,
+    required this.streaks,
     this.minimumDate,
     this.maximumDate,
-    required this.primaryColor,
     required this.pendingDates,
-    required this.someComplete, required this.streaks,
   }) : super(key: key);
 
   @override
@@ -56,37 +51,37 @@ class CustomCalendarState extends State<CustomCalendar> {
 
   DateTime currentMonthDate = DateTime.now();
 
-  DateTime? startDate;
-
-  DateTime? endDate;
+  List<Streak> streaks = [];
 
   @override
   void initState() {
     setListOfDate(currentMonthDate);
-    if (widget.initialStartDate != null) {
-      startDate = widget.initialStartDate;
-    }
-    if (widget.initialEndDate != null) {
-      endDate = widget.initialEndDate;
-    }
+    streaks = widget.streaks;
     super.initState();
   }
 
   void setListOfDate(DateTime monthDate) {
     dateList.clear();
-    final DateTime newDate = DateTime(monthDate.year, monthDate.month, 0);
+    final DateTime previousMothDay =
+        DateTime(monthDate.year, monthDate.month, 0); //last month weekday
 
-    int previousMothDay = 0; //week like sunday
-    if (newDate.weekday < 6) {
-      //!sunday
-      previousMothDay = newDate.weekday + 1;
-      for (int i = 1; i <= previousMothDay; i++) {
+    int newDate = 0; //week like sunday
+    if (previousMothDay.weekday < 6) {
+      newDate = previousMothDay.weekday + 1;
+      for (int i = 1; i <= newDate; i++) {
         //gets previous month days
-        dateList.add(newDate.subtract(Duration(days: previousMothDay - i)));
+        dateList.add(previousMothDay.subtract(Duration(days: newDate - i)));
+      }
+    } else if (previousMothDay.weekday == 7) {
+      log('==============');
+      newDate = 1;
+      for (int i = 1; i <= newDate; i++) {
+        //gets previous month days
+        dateList.add(previousMothDay.subtract(Duration(days: newDate - i)));
       }
     }
-    for (int i = 0; i < (42 - previousMothDay); i++) {
-      dateList.add(newDate.add(Duration(days: i + 1)));
+    for (int i = 0; i < (42 - newDate); i++) {
+      dateList.add(previousMothDay.add(Duration(days: i + 1)));
     }
 
     final ls = dateList.sublist(0, 7);
@@ -151,12 +146,11 @@ class CustomCalendarState extends State<CustomCalendar> {
                   child: Text(
                     DateFormat('MMMM').format(currentMonthDate),
                     style: const TextStyle(
-                color: Color(0xFF192966),
-                fontSize: 20,
-       
-                fontWeight: FontWeight.w700,
-                height: 0,
-              ),
+                      color: Color(0xFF192966),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      height: 0,
+                    ),
                   ),
                 ),
               ),
@@ -253,13 +247,10 @@ class CustomCalendarState extends State<CustomCalendar> {
                       child: Container(
                         height: 3,
                         decoration: BoxDecoration(
-                          color: startDate != null && endDate != null
-                              ? getIsItStartAndEndDate(date) ||
-                                      getIsInRange(date)
-                                  ? const Color(0xFF1C9D67)
-                                  : Colors.transparent
-                              : Colors.transparent,
-                        ),
+                            color: getIsItStartAndEndDate(date) ||
+                                    getIsInRange(date)
+                                ? const Color(0xFF1C9D67)
+                                : Colors.transparent),
                       ),
                     ),
                   ),
@@ -301,12 +292,13 @@ class CustomCalendarState extends State<CustomCalendar> {
                         height: 32,
                         width: 32,
                         decoration: BoxDecoration(
-                          color: isPendingdayOrSomeComplete(
-                                  date, widget.someComplete)
+                          color: isSomeComplete(date)
                               ? Colors.white
                               : getIsItStartAndEndDate(date) ||
                                       getIsInRange(date)
-                                  ? const Color(0xFFB5E1B2)
+                                  ? currentMonthDate.month == date.month
+                                      ? const Color(0xFFB5E1B2)
+                                      : const Color(0xFFE1E1E1)
                                   : Colors.transparent,
                           borderRadius:
                               const BorderRadius.all(Radius.circular(32.0)),
@@ -315,7 +307,9 @@ class CustomCalendarState extends State<CustomCalendar> {
                                 ? const Color(0xFF3B61F4)
                                 : getIsItStartAndEndDate(date) ||
                                         getIsInRange(date)
-                                    ? const Color(0xFF1C9D67)
+                                    ? currentMonthDate.month == date.month
+                                        ? const Color(0xFF1C9D67)
+                                        : const Color(0xFF9D9D9D)
                                     : Colors.transparent,
                             width: 2,
                           ),
@@ -333,8 +327,7 @@ class CustomCalendarState extends State<CustomCalendar> {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            isPendingdayOrSomeComplete(
-                                    date, widget.pendingDates)
+                            isPendingday(date) || isSomeComplete(date)
                                 ? Container(
                                     width: 6,
                                     height: 6,
@@ -366,30 +359,19 @@ class CustomCalendarState extends State<CustomCalendar> {
     return noList;
   }
 
-  bool getIsInRange(DateTime date) {
-    if (startDate != null && endDate != null) {
-      if (date.isAfter(startDate!) && date.isBefore(endDate!)) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }
-
   bool isSameDay(DateTime date) {
     return DateTime.now().day == date.day &&
         DateTime.now().month == date.month &&
         DateTime.now().year == date.year;
   }
 
-  bool isPendingdayOrSomeComplete(DateTime date, List<DateTime> dates) {
+  bool isPendingday(DateTime date) {
     bool status = false;
-    for (int i = 0; i < dates.length; i++) {
-      if (dates[i].day == date.day &&
-          dates[i].month == date.month &&
-          dates[i].year == date.year) {
+
+    for (int i = 0; i < widget.pendingDates.length; i++) {
+      if (widget.pendingDates[i].day == date.day &&
+          widget.pendingDates[i].month == date.month &&
+          widget.pendingDates[i].year == date.year) {
         status = true;
         break;
       }
@@ -398,44 +380,92 @@ class CustomCalendarState extends State<CustomCalendar> {
     return status;
   }
 
-  bool getIsItStartAndEndDate(DateTime date) {
-    if (startDate != null &&
-        startDate!.day == date.day &&
-        startDate!.month == date.month &&
-        startDate!.year == date.year) {
-      return true;
-    } else if (endDate != null &&
-        endDate!.day == date.day &&
-        endDate!.month == date.month &&
-        endDate!.year == date.year) {
-      return true;
-    } else {
-      return false;
+  bool isSomeComplete(DateTime date) {
+    bool status = false;
+
+    for (int x = 0; x < streaks.length; x++) {
+      for (int i = 0; i < streaks[x].someComplete.length; i++) {
+        if (streaks[x].someComplete[i].day == date.day &&
+            streaks[x].someComplete[i].month == date.month &&
+            streaks[x].someComplete[i].year == date.year) {
+          status = true;
+          break;
+        }
+      }
     }
+
+    return status;
+  }
+
+  bool getIsInRange(DateTime date) {
+    bool status = false;
+    for (int i = 0; i < streaks.length; i++) {
+      if (date.isAfter(streaks[i].streakStartdate) &&
+          date.isBefore(streaks[i].streakEndDate)) {
+        status = true;
+        break;
+      }
+    }
+    return status;
+  }
+
+  bool getIsItStartAndEndDate(DateTime date) {
+    bool status = false;
+    for (int i = 0; i < streaks.length; i++) {
+      final startDate = streaks[i].streakStartdate;
+      final endDate = streaks[i].streakEndDate;
+      if (startDate.day == date.day &&
+          startDate.month == date.month &&
+          startDate.year == date.year) {
+        status = true;
+        break;
+      } else if (endDate.day == date.day &&
+          endDate.month == date.month &&
+          endDate.year == date.year) {
+        status = true;
+        break;
+      } else {
+        status = false;
+      }
+    }
+
+    return status;
   }
 
   bool isStartDateRadius(DateTime date) {
-    if (startDate != null &&
-        startDate!.day == date.day &&
-        startDate!.month == date.month) {
-      return true;
-    } else if (date.weekday == 7) {
-      return true;
-    } else {
-      return false;
+    bool status = false;
+    for (int i = 0; i < streaks.length; i++) {
+      final startDate = streaks[i].streakStartdate;
+
+      if (startDate.day == date.day && startDate.month == date.month) {
+        status = true;
+        break;
+      } else if (date.weekday == 7) {
+        status = true;
+        break;
+      } else {
+        status = false;
+      }
     }
+    return status;
   }
 
   bool isEndDateRadius(DateTime date) {
-    if (endDate != null &&
-        endDate!.day == date.day &&
-        endDate!.month == date.month) {
-      return true;
-    } else if (date.weekday == 6) {
-      return true;
-    } else {
-      return false;
+    bool status = false;
+    for (int i = 0; i < streaks.length; i++) {
+      final endDate = streaks[i].streakEndDate;
+      if (endDate.day == date.day && endDate.month == date.month) {
+        status = true;
+        break;
+      } else if (date.weekday == 6) {
+        status = true;
+        break;
+      } else {
+        status = false;
+      }
     }
+
+    return status;
   }
 
   int getDaysInMonth(int year, int month) {
@@ -462,14 +492,12 @@ class CustomCalendarState extends State<CustomCalendar> {
   }
 }
 
-
 class Streak {
-  final List<DateTime> someComplete, pendingDates;
+  final List<DateTime> someComplete;
   final DateTime streakStartdate, streakEndDate;
 
   const Streak(
       {required this.streakEndDate,
-      required this.pendingDates,
       required this.someComplete,
       required this.streakStartdate});
 }
