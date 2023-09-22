@@ -99,108 +99,109 @@ class CustomCalendarState extends State<CustomCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(
-            left: 8.0,
-            right: 8.0,
-            top: 4,
-            bottom: 4,
-          ),
-          child: Row(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: 38,
-                  width: 38,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(24.0)),
-                    border: Border.all(
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(24.0)),
-                      onTap: () {
-                        setState(() {
-                          currentMonthDate = DateTime(
-                              currentMonthDate.year, currentMonthDate.month, 0);
-                          setListOfDate(currentMonthDate);
-                        });
-                      },
-                      child: const Icon(
-                        Icons.keyboard_arrow_left,
-                        color: Colors.grey,
+    return Container(
+     
+
+      decoration: ShapeDecoration(
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          )),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(
+              left: 8.0,
+              right: 8.0,
+              top: 4,
+              bottom: 4,
+            ),
+            child: Row(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    height: 38,
+                    width: 38,
+                   
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(24.0)),
+                        onTap: () {
+                          setState(() {
+                            currentMonthDate = DateTime(currentMonthDate.year,
+                                currentMonthDate.month, 0);
+                            setListOfDate(currentMonthDate);
+                          });
+                        },
+                        child: const Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: Center(
-                  child: Text(
-                    DateFormat('MMMM').format(currentMonthDate),
-                    style: const TextStyle(
-                      color: Color(0xFF192966),
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      height: 0,
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: 38,
-                  width: 38,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(24.0)),
-                    border: Border.all(
-                      color: Colors.grey.shade300,
-                    ),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(24.0)),
-                      onTap: () {
-                        setState(() {
-                          currentMonthDate = DateTime(currentMonthDate.year,
-                              currentMonthDate.month + 2, 0);
-                          setListOfDate(currentMonthDate);
-                        });
-                      },
-                      child: const Icon(
-                        Icons.keyboard_arrow_right,
-                        color: Colors.grey,
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      DateFormat('MMMM').format(currentMonthDate),
+                      style: const TextStyle(
+                        color: Color(0xFF192966),
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        height: 0,
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    height: 38,
+                    width: 38,
+                   
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(24.0)),
+                        onTap: () {
+                          setState(() {
+                            currentMonthDate = DateTime(currentMonthDate.year,
+                                currentMonthDate.month + 2, 0);
+                            setListOfDate(currentMonthDate);
+                          });
+                        },
+                        child: const Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 8, left: 8, bottom: 8),
-          child: Row(
-            children: getDaysNameUI(),
+          Padding(
+            padding: const EdgeInsets.only(right: 8, left: 8, bottom: 8),
+            child: Row(
+              children: getDaysNameUI(),
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 8, left: 8),
-          child: Column(
-            children: getDaysNoUI(),
+          Padding(
+            padding: const EdgeInsets.only(right: 0, left: 16),
+            child: Column(
+              children: getDaysNoUI(),
+            ),
           ),
-        ),
-      ],
+          StatusWidget()
+        ],
+      ),
     );
   }
 
@@ -489,6 +490,95 @@ class CustomCalendarState extends State<CustomCalendar> {
       31
     ];
     return daysInMonth[month - 1];
+  }
+}
+
+class StatusWidget extends StatelessWidget {
+  const StatusWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: ShapeDecoration(
+              color: Color(0xFFDB5656),
+              shape: OvalBorder(),
+            ),
+          ),
+          SizedBox(
+            width: 4,
+          ),
+          Text(
+            'Pending',
+            style: TextStyle(
+              color: Color(0xFF7F7F7F),
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              height: 0,
+            ),
+          ),
+          SizedBox(
+            width: 12,
+          ),
+          Container(
+            width: 6,
+            height: 6,
+            decoration: ShapeDecoration(
+              color: Color(0xFF1C9D67),
+              shape: OvalBorder(),
+            ),
+          ),
+          SizedBox(
+            width: 4,
+          ),
+          Text(
+            'All Complete',
+            style: TextStyle(
+              color: Color(0xFF7F7F7F),
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              height: 0,
+            ),
+          ),
+          SizedBox(
+            width: 12,
+          ),
+          Container(
+            width: 6,
+            height: 6,
+            decoration: ShapeDecoration(
+              shape: OvalBorder(
+                side: BorderSide(
+                  width: 1.50,
+                  strokeAlign: BorderSide.strokeAlignCenter,
+                  color: Color(0xFF1C9D67),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 4,
+          ),
+          Text(
+            'Some Complete',
+            style: TextStyle(
+              color: Color(0xFF7F7F7F),
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              height: 0,
+            ),
+          )
+        ],
+      ),
+    );
   }
 }
 

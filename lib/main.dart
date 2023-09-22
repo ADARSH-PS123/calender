@@ -35,6 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.amberAccent,
       body: SafeArea(
         child: Padding(
           padding:
@@ -50,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       streakEndDate: DateTime(2023,9,5),
                     
                       someComplete: [
-                         DateTime.now().add(Duration(days: 2))
+                        DateTime(2023,9,5)
                       ],
                       streakStartdate: DateTime(2023,8,25)),
                       // Streak(
